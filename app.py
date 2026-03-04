@@ -1,43 +1,75 @@
 import streamlit as st
 import joblib
 import numpy as np
-import pandas as pd
 
-# Load preprocess and model
 scaler = joblib.load("preprocessor.pkl")
 model = joblib.load("model.pkl")
 
 def main():
-    st.title('Heart Disease Prediction Model Deployment')
+    st.title('Heart Disease Prediction')
 
-    st.subheader("Input Patient Data")
+    st.subheader("Patient Information")
 
+    # ===== NUMERICAL =====
     age = st.slider('Age', 20, 100, 50)
-    sex = st.slider('Sex (0 = Female, 1 = Male)', 0, 1, 1)
-    cp = st.slider('Chest Pain Type (0–3)', 0, 3, 1)
-    trestbps = st.slider('Resting Blood Pressure (mm Hg)', 80, 210, 120)
+    trestbps = st.slider('Resting Blood Pressure (mm Hg)', 80, 200, 120)
     chol = st.slider('Cholesterol (mg/dl)', 100, 600, 200)
-    fbs = st.slider('Fasting Blood Sugar > 120 mg/dl (0/1)', 0, 1, 0)
-    restecg = st.slider('Rest ECG (0–2)', 0, 2, 1)
     thalach = st.slider('Max Heart Rate Achieved', 60, 220, 150)
-    exang = st.slider('Exercise Induced Angina (0/1)', 0, 1, 0)
     oldpeak = st.slider('ST Depression (oldpeak)', 0.0, 6.0, 1.0, step=0.1)
-    slope = st.slider('Slope (0–2)', 0, 2, 1)
-    ca = st.slider('Number of Major Vessels (0–4)', 0, 4, 0)
-    thal = st.slider('Thal (0–3)', 0, 3, 2)
+
+    # ===== CATEGORICAL =====
+    sex = st.radio('Sex', ['Female', 'Male'])
+    cp = st.selectbox('Chest Pain Type', 
+                      ['Typical Angina (0)',
+                       'Atypical Angina (1)',
+                       'Non-anginal Pain (2)',
+                       'Asymptomatic (3)'])
+
+    fbs = st.radio('Fasting Blood Sugar > 120 mg/dl', ['No (0)', 'Yes (1)'])
+
+    restecg = st.selectbox('Rest ECG',
+                           ['Normal (0)',
+                            'ST-T abnormality (1)',
+                            'Left ventricular hypertrophy (2)'])
+
+    exang = st.radio('Exercise Induced Angina',
+                     ['No (0)', 'Yes (1)'])
+
+    slope = st.selectbox('Slope',
+                         ['Upsloping (0)',
+                          'Flat (1)',
+                          'Downsloping (2)'])
+
+    ca = st.selectbox('Number of Major Vessels',
+                      [0,1,2,3,4])
+
+    thal = st.selectbox('Thal',
+                        ['Normal (1)',
+                         'Fixed defect (2)',
+                         'Reversible defect (3)'])
 
     if st.button('Make Prediction'):
+        # Encoding manual supaya sesuai model training
+        sex = 1 if sex == 'Male' else 0
+        cp = int(cp[-2])
+        fbs = 1 if 'Yes' in fbs else 0
+        restecg = int(restecg[-2])
+        exang = 1 if 'Yes' in exang else 0
+        slope = int(slope[-2])
+        thal = int(thal[-2])
+
         features = [
-            age, sex, cp, trestbps, chol, fbs,
-            restecg, thalach, exang, oldpeak,
-            slope, ca, thal
+            age, sex, cp, trestbps, chol,
+            fbs, restecg, thalach, exang,
+            oldpeak, slope, ca, thal
         ]
+
         result = make_prediction(features)
 
         if result == 1:
-            st.error("⚠️ Patient has Heart Disease")
+            st.error("Patient has Heart Disease")
         else:
-            st.success("✅ Patient does NOT have Heart Disease")
+            st.success("Patient does NOT have Heart Disease")
 
 
 def make_prediction(features):
