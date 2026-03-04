@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 
 # Load preprocess and model
-scaler = joblib.load("artifacts/preprocessor.pkl")
-model = joblib.load("artifacts/model.pkl")
+scaler = joblib.load("preprocessor.pkl")
+model = joblib.load("model.pkl")
 
 def main():
     st.title('Heart Disease Prediction Model Deployment')
